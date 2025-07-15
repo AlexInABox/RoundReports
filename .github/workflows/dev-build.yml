@@ -66,7 +66,7 @@ jobs:
       - name: 🚀 Publish GitHub Release
         uses: softprops/action-gh-release@v2
         with:
-          tag_name: v${{ steps.get_version.outputs.version }}
+          tag_name: v${{ steps.get_version.outputs.version }}-dev
           name: v${{ steps.get_version.outputs.version }}
           draft: false
           prerelease: true

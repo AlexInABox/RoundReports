@@ -654,9 +654,12 @@
 
                             foreach (EBroadcast br in brList)
                             {
-                                br.Content = ProcessReportArgs(br.Content);
-                                Log.Debug($"Queueing broadcast: {br.Content}");
-                                Map.Broadcast(br);
+                                // Make a copy of the broadcast to avoid modifying the original
+                                EBroadcast copiedBroadcast = new EBroadcast(br.Content, br.Duration, br.Show);
+
+                                copiedBroadcast.Content = ProcessReportArgs(copiedBroadcast.Content);
+                                Log.Debug($"Queueing Broadcast: {copiedBroadcast.Content}");
+                                Map.Broadcast(copiedBroadcast);
                             }
                         }
                     }
@@ -675,45 +678,68 @@
             }
         }
 
-        // Todo: Slow AF
         private string ProcessReportArgs(string input)
-        => input
-            .Replace("{ID}", UniqueId.ToString())
-            .Replace("{UPTIMEROUND}", UptimeRound.ToString())
-            .Replace("{HUMANMVP}", GetStat<MVPStats>().HumanMVP)
-            .Replace("{SCPMVP}", GetStat<MVPStats>().SCPMVP)
-            .Replace("{TOTALKILLS}", GetStat<FinalStats>().TotalKills.ToString())
-            .Replace("{SCPKILLS}", GetStat<FinalStats>().SCPKills.ToString())
-            .Replace("{MTFKILLS}", GetStat<FinalStats>().MTFKills.ToString())
-            .Replace("{DCLASSKILLS}", GetStat<FinalStats>().DClassKills.ToString())
-            .Replace("{CHAOSKILLS}", GetStat<FinalStats>().ChaosKills.ToString())
-            .Replace("{SCIENTISTKILLS}", GetStat<FinalStats>().TotalKills.ToString())
-            .Replace("{HUMANKILLS}", (GetStat<FinalStats>().TotalKills - GetStat<FinalStats>().SCPKills).ToString())
-            .Replace("{TOTALDEATHS}", GetStat<FinalStats>().TotalDeaths.ToString())
-            .Replace("{TOTALDAMAGE}", GetStat<OrganizedDamageStats>().TotalDamage.ToString())
-            .Replace("{WINNINGTEAM}", GetStat<FinalStats>().WinningTeam)
-            .Replace("{ROUNDTIME}", GetDisplay(GetStat<FinalStats>().RoundTime))
-            .Replace("{STARTTIME}", GetDisplay(GetStat<StartingStats>().StartTime))
-            .Replace("{PLAYERCOUNT}", Player.List.Count().ToString())
-            .Replace("{TOTALDROPS}", GetStat<ItemStats>().TotalDrops.ToString())
-            .Replace("{KEYCARDSCANS}", GetStat<ItemStats>().KeycardScans.ToString())
-            .Replace("{TOTALRESPAWNED}", GetStat<MiscStats>().TotalRespawned.ToString())
-            .Replace("{SPAWNWAVES}", GetStat<MiscStats>().SpawnWaves.Count.ToString())
-            .Replace("{TOTALSHOTSFIRED}", GetStat<ItemStats>().TotalShotsFired.ToString())
-            .Replace("{TOTALRELOADS}", GetStat<ItemStats>().TotalReloads.ToString())
-            .Replace("{DOORSOPENED}", GetStat<FinalStats>().DoorsOpened.ToString())
-            .Replace("{DOORSCLOSED}", GetStat<FinalStats>().DoorsClosed.ToString())
-            .Replace("{DOORSDESTROYED}", GetStat<FinalStats>().DoorsDestroyed.ToString())
-            .Replace("{FIRST330USER}", GetDisplay(GetStat<SCPStats>().FirstUser, typeof(Player)))
-            .Replace("{TOTALCANDIESTAKEN}", GetStat<SCPStats>().TotalCandiesTaken.ToString())
-            .Replace("{BUTTONUNLOCKER}", GetDisplay(GetStat<FinalStats>().ButtonUnlocker, typeof(Player)))
-            .Replace("{FIRSTWARHEADACTIVATOR}", GetDisplay(GetStat<FinalStats>().FirstActivator, typeof(Player)))
-            .Replace("{FIRST914ACTIVATOR}", GetDisplay(GetStat<SCPStats>().FirstActivator, typeof(Player)))
-            .Replace("{TOTAL914ACTIVATIONS}", GetStat<SCPStats>().TotalActivations.ToString())
-            .Replace("{TOTALITEMUPGRADES}", GetStat<SCPStats>().TotalItemUpgrades.ToString())
-            .Replace("{TOTALINTERACTIONS}", GetStat<FinalStats>().TotalInteractions.ToString())
-            .Replace("{REPORTLINK}", Link)
-            .Replace("{POSTDATE}", UploadTime)
-            .Replace("{EXPIREDATE}", ExpireTime);
+        {
+            FinalStats final = GetStat<FinalStats>();
+            MVPStats mvp = GetStat<MVPStats>();
+            OrganizedDamageStats dmg = GetStat<OrganizedDamageStats>();
+            StartingStats starting = GetStat<StartingStats>();
+            ItemStats item = GetStat<ItemStats>();
+            MiscStats misc = GetStat<MiscStats>();
+            SCPStats scp = GetStat<SCPStats>();
+
+            int totalKills = final.TotalKills;
+            int scpKills = final.SCPKills;
+
+            Log.Debug("THIS IS WHEEReE TO LOOK!!!");
+            //debug print mvp stats
+            Log.Debug($"Human MVP: {mvp.HumanMVP}");
+            Dictionary<string, string> replacements = new Dictionary<string, string>
+            {
+                ["{ID}"] = UniqueId.ToString(),
+                ["{UPTIMEROUND}"] = UptimeRound.ToString(),
+                ["{HUMANMVP}"] = mvp.HumanMVP,
+                ["{SCPMVP}"] = mvp.SCPMVP,
+                ["{TOTALKILLS}"] = totalKills.ToString(),
+                ["{SCPKILLS}"] = scpKills.ToString(),
+                ["{MTFKILLS}"] = final.MTFKills.ToString(),
+                ["{DCLASSKILLS}"] = final.DClassKills.ToString(),
+                ["{CHAOSKILLS}"] = final.ChaosKills.ToString(),
+                ["{SCIENTISTKILLS}"] = totalKills.ToString(),
+                ["{HUMANKILLS}"] = (totalKills - scpKills).ToString(),
+                ["{TOTALDEATHS}"] = final.TotalDeaths.ToString(),
+                ["{TOTALDAMAGE}"] = dmg.TotalDamage.ToString(),
+                ["{WINNINGTEAM}"] = final.WinningTeam,
+                ["{ROUNDTIME}"] = GetDisplay(final.RoundTime),
+                ["{STARTTIME}"] = GetDisplay(starting.StartTime),
+                ["{PLAYERCOUNT}"] = Player.List.Count.ToString(),
+                ["{TOTALDROPS}"] = item.TotalDrops.ToString(),
+                ["{KEYCARDSCANS}"] = item.KeycardScans.ToString(),
+                ["{TOTALRESPAWNED}"] = misc.TotalRespawned.ToString(),
+                ["{SPAWNWAVES}"] = misc.SpawnWaves.Count.ToString(),
+                ["{TOTALSHOTSFIRED}"] = item.TotalShotsFired.ToString(),
+                ["{TOTALRELOADS}"] = item.TotalReloads.ToString(),
+                ["{DOORSOPENED}"] = final.DoorsOpened.ToString(),
+                ["{DOORSCLOSED}"] = final.DoorsClosed.ToString(),
+                ["{DOORSDESTROYED}"] = final.DoorsDestroyed.ToString(),
+                ["{FIRST330USER}"] = GetDisplay(scp.FirstUser, typeof(Player)),
+                ["{TOTALCANDIESTAKEN}"] = scp.TotalCandiesTaken.ToString(),
+                ["{BUTTONUNLOCKER}"] = GetDisplay(final.ButtonUnlocker, typeof(Player)),
+                ["{FIRSTWARHEADACTIVATOR}"] = GetDisplay(final.FirstActivator, typeof(Player)),
+                ["{FIRST914ACTIVATOR}"] = GetDisplay(scp.FirstActivator, typeof(Player)),
+                ["{TOTAL914ACTIVATIONS}"] = scp.TotalActivations.ToString(),
+                ["{TOTALITEMUPGRADES}"] = scp.TotalItemUpgrades.ToString(),
+                ["{TOTALINTERACTIONS}"] = final.TotalInteractions.ToString(),
+                ["{REPORTLINK}"] = Link,
+                ["{POSTDATE}"] = UploadTime,
+                ["{EXPIREDATE}"] = ExpireTime,
+            };
+
+            StringBuilder sb = new StringBuilder(input);
+            foreach (KeyValuePair<string, string> pair in replacements)
+                sb.Replace(pair.Key, pair.Value);
+
+            return sb.ToString();
+        }
     }
 }
