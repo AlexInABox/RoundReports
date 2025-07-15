@@ -285,8 +285,6 @@
             Points[PointTeam.Human] = new();
 
             MainPlugin.Reporter = new Reporter();
-            MainPlugin.Reporter.Kill();
-            MainPlugin.Reporter = new Reporter();
             MainPlugin.IsRestarting = false;
 
             // Map Generation Stats
