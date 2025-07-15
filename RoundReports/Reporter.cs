@@ -654,9 +654,12 @@
 
                             foreach (EBroadcast br in brList)
                             {
-                                br.Content = ProcessReportArgs(br.Content);
-                                Log.Debug($"Queueing broadcast: {br.Content}");
-                                Map.Broadcast(br);
+                                // Make a copy of the broadcast to avoid modifying the original
+                                EBroadcast copiedBroadcast = new EBroadcast(br.Content, br.Duration, br.Show);
+
+                                copiedBroadcast.Content = ProcessReportArgs(copiedBroadcast.Content);
+                                Log.Debug($"Queueing Broadcast: {copiedBroadcast.Content}");
+                                Map.Broadcast(copiedBroadcast);
                             }
                         }
                     }
@@ -688,6 +691,9 @@
             int totalKills = final.TotalKills;
             int scpKills = final.SCPKills;
 
+            Log.Debug("THIS IS WHEEReE TO LOOK!!!");
+            //debug print mvp stats
+            Log.Debug($"Human MVP: {mvp.HumanMVP}");
             Dictionary<string, string> replacements = new Dictionary<string, string>
             {
                 ["{ID}"] = UniqueId.ToString(),
