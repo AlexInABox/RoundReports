@@ -1,4 +1,4 @@
-﻿namespace RoundReports
+namespace RoundReports
 {
     using System;
     using System.Collections;
@@ -513,7 +513,12 @@
         /// Huge method for handling the upload to Pastee and Discord, as well as the in-game broadcasts.
         /// </summary>
         /// <param name="iter">The current iteration of the method. Upload will be canceled if this reaches 10.</param>
-        /// <returns>Coroutine.</returns>
+        /// <summary>
+        /// Attempts to upload the round report to Pastee and send notifications to Discord and in-game broadcasts, retrying up to 10 times on failure.
+        /// </summary>
+        /// <param name="data">The report data to upload.</param>
+        /// <param name="iter">The current retry attempt count (default is 0).</param>
+        /// <returns>An enumerator for coroutine execution.</returns>
         private IEnumerator<float> TryUpload(PasteEntry data, int iter = 0)
         {
             Log.Debug("Beginning report upload process.");
@@ -678,6 +683,11 @@
             }
         }
 
+        /// <summary>
+        /// Replaces placeholders in the input string with corresponding round report values, such as MVPs, kill counts, times, and report metadata.
+        /// </summary>
+        /// <param name="input">The string containing placeholders to be replaced with report data.</param>
+        /// <returns>The input string with all recognized placeholders replaced by their current values.</returns>
         private string ProcessReportArgs(string input)
         {
             FinalStats final = GetStat<FinalStats>();
