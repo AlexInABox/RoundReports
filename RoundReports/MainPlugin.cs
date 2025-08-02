@@ -75,7 +75,7 @@
         public override string Author => "Thunder";
 
         /// <inheritdoc/>
-        public override Version Version => new(1, 1, 6);
+        public override Version Version => new(1, 1, 7);
 
         /// <inheritdoc/>
         public override PluginPriority Priority => PluginPriority.Last;
