@@ -9,6 +9,9 @@ public static class RoundReports
     {
         if (!Player.TryGet(playerId, out Player player)) return 0;
 
+        // Null safety checks
+        if (MainPlugin.Handlers?.Points == null) return 0;
+
         int points = 0;
 
         if (MainPlugin.Handlers.Points.TryGetValue(PointTeam.Human, out Dictionary<Player, int> dictHuman))
