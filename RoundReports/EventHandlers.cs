@@ -48,12 +48,12 @@
         /// <summary>
         /// Gets or sets a <see cref="Dictionary{TKey, TValue}"/> of <see cref="PointTeam"/> and players' points in each.
         /// </summary>
-        public Dictionary<PointTeam, Dictionary<Player, int>> Points { get; set; }
+        public Dictionary<PointTeam, Dictionary<Player, int>> Points { get; set; } = new();
 
         /// <summary>
         /// Gets or sets a <see cref="Dictionary{TKey, TValue}"/> of players and the amount of damage they've delt to SCPs.
         /// </summary>
-        public Dictionary<Player, float> DamageToScps { get; set; }
+        public Dictionary<Player, float> DamageToScps { get; set; } = new();
 
         /// <summary>
         /// Gets or sets a value indicating whether or not the first escape has occurred.
